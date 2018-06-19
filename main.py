@@ -11,7 +11,7 @@ id = 0
 for r in range(img.shape[0]):
     row = []
     for c in range(img.shape[1]):
-        reg = Region(True,img[r,c],id)
+        reg = Region(True,img[r,c])
         id+=1
         row.append(reg)
     pixel_regions.append(row)

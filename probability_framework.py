@@ -6,8 +6,10 @@ def get_sparseness(R):
    # n1 = norm_1(G)
    n1 = 1
    n2 = np.linalg.norm(G,ord=2)
-   n = 256
-   S = 1/(math.sqrt(n))*(math.sqrt(n)-n1/n2)
+   n = len(G)-1
+   if n == 1:
+       return 2
+   S = (1/(math.sqrt(n)-1))*(math.sqrt(n)-n1/n2)
    return S
 
 def prob_cue_R(R):
@@ -20,7 +22,7 @@ def prob_cue_R(R):
 
     return res
 
-def prob_cue(Ri,Rj):
+def prob_cue_1(Ri,Rj):
     p_cue_ri = prob_cue_R(Ri)
     p_cue_rj = prob_cue_R(Rj)
     res = min(p_cue_ri,p_cue_rj)
@@ -135,8 +137,11 @@ def prob_sp_cue(Ri, Rj, cue):
 #main function
 def prob_sp(Ri, Rj):
     res = 0
-    # cues = ["intensity","texture"]
-    cues = ["intensity"]
+    cues = ["intensity","texture"]
+    #cues = ["texture"]
     for cue in cues:
-        res += prob_sp_cue(Ri,Rj,cue)*prob_cue(Ri,Rj)
+        p_cue = prob_cue_1(Ri,Rj)
+        if cue == "texture":
+            p_cue = 1 - p_cue
+        res += prob_sp_cue(Ri,Rj,cue)*p_cue
     return res

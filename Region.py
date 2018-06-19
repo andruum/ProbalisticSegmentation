@@ -4,14 +4,20 @@ import probability_framework
 
 class Region:
 
-    def __init__(self,pixel=False,value = 0,id = -1):
-        self.id = id
+    def __init__(self,pixel=False,value = -1):
+
         self.weights = []
         self.subregions = []
         self.pixel = pixel
         self.value = value
         self.neighbors = []
         self.directions = []
+        self.parent = None
+
+    def addSubregion(self,region):
+        print("Ok")
+        self.subregions.append(region)
+        region.parent = self
 
     def getIntensity(self):
         if self.pixel:
@@ -36,8 +42,10 @@ class Region:
         hj = region.getEdgeResponse()
         Dij = 0
         for i in range(4):
-            Dij += math.pow((hi[i] - hj[i]) / (hi[i] + hj[i]), 2)
-
+            if abs(hi[i]) + abs(hj[i]) != 0:
+                Dij += math.pow((hi[i] - hj[i]) / (hi[i] + hj[i]), 2)
+            else:
+                Dij += 255
         return Dij
 
     def getTextureDifferenceP(self):
@@ -72,7 +80,7 @@ class Region:
 
     def getHist(self):
         pixels = self.getPixels()
-        return np.bincount(pixels,minlength=256)/256
+        return np.bincount([len(pixels)])/len(pixels)
 
     # direction 0 upper ,1 right ,2 down ,3 left
     def addNeighbor(self,region,direction=-1):
@@ -85,10 +93,6 @@ class Region:
     def calc_weights(self):
         for R in self.neighbors:
             self.weights.append(probability_framework.prob_sp(self,R))
-
-
-    def addSubregion(self, region):
-        self.neighbors.append(region)
 
     def getTotalBoundary(self):
         res = 0
@@ -106,7 +110,7 @@ class Region:
         else:
             for pj in region.neighbors:
                 # print("ids",self.id,pi.id,pj.id)
-                res += 1 if (self.id == pj.id) else 0
+                res += 1 if (self == pj) else 0
         return res
 
     def externalPDifference(self):
@@ -123,6 +127,21 @@ class Region:
             len_d += self.getCommonLen(nb)*abs(self.getIntensity() - nb.getIntensity())
         res = len_d/self.getTotalBoundary()
         return res
+
+    def computeProbabilityofC(self):
+        cp = 0
+        vp = 0
+        for nb,w in zip(self.neighbors,self.weights):
+            if nb.parent is not None:
+                cp += w
+            vp += w
+        return cp/vp
+
+    def processNeighbors(self):
+        for sr in self.subregions:
+            for nb in sr.neighbors:
+                if nb.parent != self and nb.parent not in self.neighbors:
+                    self.addNeighbor(nb.parent)
 
 # class Pixel:
 #
