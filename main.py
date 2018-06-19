@@ -1,8 +1,29 @@
 
 
+def get_sparseness(R):
+   G = calc_hist(R)
+   n1 = norm_1(G)
+   n2 = norm_2(G)
+   n = 256
+   S = 1/(sqrt(n))*(sqrt(n)-n1/n2)
+   return S
 
-def prob_cue(Hi,Hj):
-    pass
+def prob_cue_R(R):
+    sparseness = get_sparseness(R)
+
+    a = 41.9162
+    b = -37.1885
+
+    res = 1/(1-exp(-(a*sparseness+b)))
+
+    return res
+
+def prob_cue(Ri,Rj):
+    p_cue_ri = prob_cue_R(Ri)
+    p_cue_rj = prob_cue_R(Rj)
+
+    res = min(p_cue_ri,p_cue_rj)
+    return res
 
 def prior(Ri,Rj):
     len = Ri.getCommonLen(Rj)
@@ -60,14 +81,19 @@ def likehood_intensity_m(Ri,Rj):
 
 
 def prob_sp_cue(Ri, Rj, cue):
-    Likehood = Likehoods[cue]
-    Likehood(Ri,Rj)
+    likehood_p = likehoods_p[cue]
+    likehood_m = likehoods_m[cue]
+    lm = likehood_m(Ri,Rj)
+    lp = likehood_p(Ri,Rj)
 
     p_sp = prior(Ri,Rj)
     p_sm = 1 - p_sp
 
+    res = lp*p_sp/(lp*p_sp+lm*p_sm)
 
-def prob_sp(Hi, Hj):
+    return res
+
+def prob_sp(Ri, Rj):
     res = 0
     for cue in cues:
-        res += prob_sp_cue(Hi,Hj,cue)
+        res += prob_sp_cue(Ri,Rj,cue)*prob_cue(Ri,Rj)
