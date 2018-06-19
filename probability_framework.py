@@ -135,6 +135,8 @@ def prob_sp_cue(Ri, Rj, cue):
 #main function
 def prob_sp(Ri, Rj):
     res = 0
-    cues = ["intensity","texture"]
+    # cues = ["intensity","texture"]
+    cues = ["intensity"]
     for cue in cues:
         res += prob_sp_cue(Ri,Rj,cue)*prob_cue(Ri,Rj)
+    return res

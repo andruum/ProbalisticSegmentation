@@ -1,10 +1,12 @@
 import numpy as np
 import math
-
+import probability_framework
 
 class Region:
 
-    def __init__(self,pixel=False,value = 0):
+    def __init__(self,pixel=False,value = 0,id = -1):
+        self.id = id
+        self.weights = []
         self.subregions = []
         self.pixel = pixel
         self.value = value
@@ -15,6 +17,7 @@ class Region:
         if self.pixel:
             return self.value
         else:
+            return 0
             # add scale matrix
 
     def getEdgeResponse(self):
@@ -24,6 +27,7 @@ class Region:
             for nb,dir in zip(self.neighbors,self.directions):
                 res[dir] = abs(nb.value-self.value)
         else:
+            pass
             #go deep
         return res
 
@@ -63,17 +67,25 @@ class Region:
                 pixels.extend(sr.getPixels())
         return pixels
 
+    def getTotalPixels(self):
+        return len(self.getPixels())
+
     def getHist(self):
         pixels = self.getPixels()
         return np.bincount(pixels,minlength=256)/256
 
-    # direction 0,1,2,3
+    # direction 0 upper ,1 right ,2 down ,3 left
     def addNeighbor(self,region,direction=-1):
         if self.pixel:
             if direction == -1:
                 print("Error direction == -1 for pixel")
             self.directions.append(direction)
         self.neighbors.append(region)
+
+    def calc_weights(self):
+        for R in self.neighbors:
+            self.weights.append(probability_framework.prob_sp(self,R))
+
 
     def addSubregion(self, region):
         self.neighbors.append(region)
@@ -87,13 +99,14 @@ class Region:
     def getCommonLen(self,region):
         res = 0
         if not self.pixel:
-            for ri in self.subregions:
-                for rj in region.regions:
-                    res += ri.getCommonLen(rj)
+            return 0
+            # for ri in self.subregions:
+            #     for rj in region.regions:
+            #         res += ri.getCommonLen(rj)
         else:
-            for pi in self.neighbors:
-                for pj in region.neighbors:
-                    res += 1 if (pi == pj) else 0
+            for pj in region.neighbors:
+                # print("ids",self.id,pi.id,pj.id)
+                res += 1 if (self.id == pj.id) else 0
         return res
 
     def externalPDifference(self):
