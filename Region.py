@@ -1,5 +1,5 @@
 import numpy as np
-
+import math
 
 
 class Region:
@@ -27,6 +27,33 @@ class Region:
         else:
             #go deep
         return res
+
+    def getTextureDifference(self,region):
+        hi = self.getEdgeResponse()
+        hj = region.getEdgeResponse()
+        Dij = 0
+        for i in range(4):
+            Dij += math.pow((hi[i] - hj[i]) / (hi[i] + hj[i]), 2)
+
+        return Dij
+
+    def getTextureDifferenceP(self):
+        Dijs = []
+
+        for nb in self.neighbors:
+            Dijs.append(self.getTextureDifference(nb))
+
+        res = min(Dijs)
+        return res
+
+    def getTextureDifferenceM(self):
+        len_d = 0
+        for nb in self.neighbors:
+            len_d += self.getCommonLen(nb) * self.getTextureDifference(nb)
+        res = len_d / self.getTotalBoundary()
+
+        return res
+
 
     def getPixels(self):
         pixels = []
