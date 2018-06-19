@@ -1,11 +1,13 @@
-
+import numpy as np
+import math
 
 def get_sparseness(R):
-   G = calc_hist(R)
-   n1 = norm_1(G)
-   n2 = norm_2(G)
+   G = R.getHist()
+   # n1 = norm_1(G)
+   n1 = 1
+   n2 = np.linalg.norm(G,ord=2)
    n = 256
-   S = 1/(sqrt(n))*(sqrt(n)-n1/n2)
+   S = 1/(math.sqrt(n))*(math.sqrt(n)-n1/n2)
    return S
 
 def prob_cue_R(R):
@@ -14,14 +16,13 @@ def prob_cue_R(R):
     a = 41.9162
     b = -37.1885
 
-    res = 1/(1-exp(-(a*sparseness+b)))
+    res = 1/(1-math.exp(-(a*sparseness+b)))
 
     return res
 
 def prob_cue(Ri,Rj):
     p_cue_ri = prob_cue_R(Ri)
     p_cue_rj = prob_cue_R(Rj)
-
     res = min(p_cue_ri,p_cue_rj)
     return res
 
@@ -52,7 +53,8 @@ def likehood_intensity_p(Ri,Rj):
 
     omega_min = min(omega_i,omega_j)
 
-    simga_scale = sigma_noise/sqrt(omega_min)
+    sigma_noise = 1
+    simga_scale = sigma_noise/math.sqrt(omega_min)
 
     sigma_p_ij = sigma_p_local+simga_scale
 
@@ -72,7 +74,8 @@ def likehood_intensity_m(Ri,Rj):
     omega_i = Ri.getTotalPixels()
     omega_j = Rj.getTotalPixels()
     omega_min = min(omega_i,omega_j)
-    simga_scale = sigma_noise/sqrt(omega_min)
+    sigma_noise = 1
+    simga_scale = sigma_noise/math.sqrt(omega_min)
     sigma_m_ij = sigma_m_local+simga_scale
 
     res = normpdf(delta_ij,0,sigma_m_ij)
