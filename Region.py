@@ -70,6 +70,20 @@ class Region:
                     res += 1 if (pi == pj) else 0
         return res
 
+    def externalPDifference(self):
+        diffs = []
+        for nb in self.neighbors:
+            dif = abs(self.getIntensity() - nb.getIntensity())
+            diffs.append(dif)
+        res = min(diffs)
+        return res
+
+    def externalMDifference(self):
+        len_d = 0
+        for nb in self.neighbors:
+            len_d += self.getCommonLen(nb)*abs(self.getIntensity() - nb.getIntensity())
+        res = len_d/self.getTotalBoundary()
+        return res
 
 # class Pixel:
 #
