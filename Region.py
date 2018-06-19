@@ -14,6 +14,7 @@ class Region:
         if self.pixel:
             return self.value
         else:
+            # add scale matrix
 
 
     def addNeighbor(self,region):
