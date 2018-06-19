@@ -4,10 +4,9 @@ import math
 
 class Region:
 
-    def __init__(self,pixel=False,value = 0,pos = 0):
+    def __init__(self,pixel=False,value = 0):
         self.subregions = []
         self.pixel = pixel
-        self.id_pixel_pos = pos
         self.value = value
         self.neighbors = []
         self.directions = []
