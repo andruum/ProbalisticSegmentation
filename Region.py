@@ -2,6 +2,10 @@ import numpy as np
 import math
 import probability_framework
 
+
+
+
+
 class Region:
 
     def __init__(self,pixel=False,value = -1):
@@ -14,10 +18,10 @@ class Region:
         self.directions = []
         self.parent = None
 
-    def addSubregion(self,region):
+    def addSubregion(self, subregion):
         print("Ok")
-        self.subregions.append(region)
-        region.parent = self
+        self.subregions.append(subregion)
+        subregion.parent = self
 
     def getIntensity(self):
         if self.pixel:
@@ -128,11 +132,11 @@ class Region:
         res = len_d/self.getTotalBoundary()
         return res
 
-    def computeProbabilityofC(self):
+    def computeProbabilityofC(self,parent):
         cp = 0
         vp = 0
         for nb,w in zip(self.neighbors,self.weights):
-            if nb.parent is not None:
+            if nb.parent == parent:
                 cp += w
             vp += w
         return cp/vp

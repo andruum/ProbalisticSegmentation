@@ -40,6 +40,8 @@ def calc_weights(regions):
     for r in regions:
         r.calc_weights()
 
+PSI_MERGE = 0.4
+
 def coarse_0(pixels_regions):
     regions = []
     for r in range(len(pixels_regions)):
@@ -51,12 +53,13 @@ def coarse_0(pixels_regions):
                 for sr in G1.subregions:
                     for nb in sr.neighbors:
                         if nb.parent is None:
-                            res = nb.computeProbabilityofC()
-                            if res > 0.4:
+                            res = nb.computeProbabilityofC(G1)
+                            if res > PSI_MERGE:
                                 G1.addSubregion(nb)
                 regions.append(G1)
 
     #assign nighbors to new regions
     process_neighbors(regions)
+    calc_weights(regions)
 
     return regions
