@@ -1,6 +1,8 @@
 import numpy as np
 import math
 
+import Region
+
 def get_sparseness(R):
    G = R.getHist()
    # n1 = norm_1(G)
@@ -29,7 +31,7 @@ def prob_cue_1(Ri,Rj):
     return res
 
 def prior(Ri,Rj):
-    len = Ri.getCommonLen(Rj)
+    len = Region.getCommonLen(Ri,Rj)
     total_len_i = Ri.getTotalBoundary()
     total_len_j = Rj.getTotalBoundary()
     total_len_min = min(total_len_i,total_len_j)
@@ -90,7 +92,7 @@ def chi_square(x,k):
 
 
 def likehood_texture_p(Ri,Rj):
-    Dij = Ri.getTextureDifference(Rj)
+    Dij = Region.getTextureDifference(Ri,Rj)
     #degree of freedom
     k = 4
 
@@ -104,7 +106,7 @@ def likehood_texture_p(Ri,Rj):
     return res
 
 def likehood_texture_m(Ri,Rj):
-    Dij = Ri.getTextureDifference(Rj)
+    Dij = Region.getTextureDifference(Ri,Rj)
     #degree of freedom
     k = 4
 

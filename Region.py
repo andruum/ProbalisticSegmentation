@@ -8,7 +8,7 @@ def getTextureDifference(Ri, Rj):
     hi = Ri.getEdgeResponse()
     hj = Rj.getEdgeResponse()
     Dij = 0
-    for i in range(4):
+    for i in range(len(hi)):
         if abs(hi[i]) + abs(hj[i]) != 0:
             Dij += math.pow((hi[i] - hj[i]) / (hi[i] + hj[i]), 2)
         else:
@@ -21,11 +21,9 @@ def getCommonLen(Ri,Rj):
         raise Exception("Regions has different type")
 
     if not Ri.pixel:
-        return 0
-        #TODO
-        # for ri in self.subregions:
-        #     for rj in region.regions:
-        #         res += ri.getCommonLen(rj)
+        for sri in Ri.subregions:
+            for srj in Rj.subregions:
+                res += getCommonLen(sri,srj)
     else:
         for pj in Rj.neighbors:
             # print("ids",self.id,pi.id,pj.id)
@@ -52,6 +50,7 @@ class Region:
         if self.pixel:
             return self.value
         else:
+            # for i in T
             return 0
             # add scale matrix TODO
 
@@ -69,7 +68,7 @@ class Region:
     def getTextureDifferenceP(self):
         Dijs = []
         for nb in self.neighbors:
-            Dijs.append(self.getTextureDifference(nb))
+            Dijs.append(getTextureDifference(self,nb))
 
         res = min(Dijs)
         return res
@@ -77,7 +76,7 @@ class Region:
     def getTextureDifferenceM(self):
         len_d = 0
         for nb in self.neighbors:
-            len_d += self.getCommonLen(nb) * self.getTextureDifference(nb)
+            len_d += getCommonLen(self,nb) * getTextureDifference(self,nb)
         res = len_d / self.getTotalBoundary()
 
         return res
@@ -114,7 +113,7 @@ class Region:
     def getTotalBoundary(self):
         res = 0
         for n in self.neighbors:
-            res += self.getCommonLen(n)
+            res += getCommonLen(self,n)
         return res
 
     def externalPDifference(self):
@@ -128,7 +127,7 @@ class Region:
     def externalMDifference(self):
         len_d = 0
         for nb in self.neighbors:
-            len_d += self.getCommonLen(nb)*abs(self.getIntensity() - nb.getIntensity())
+            len_d += getCommonLen(self,nb)*abs(self.getIntensity() - nb.getIntensity())
         res = len_d/self.getTotalBoundary()
         return res
 

@@ -5,14 +5,18 @@ import GraphCoarse
 
 
 if __name__ == '__main__':
-    image = np.zeros((4,4))
-    for r in image.shape[0]:
-        for c in image.shape[1]:
+    image = np.zeros((3,3))
+    for r in range(image.shape[0]):
+        for c in range(image.shape[1]):
             image[r,c] = c*10
 
     print("Image:",image)
 
     G0 = GraphCoarse.image_to_graph(image)
 
-    G1 = GraphCoarse.coarse_0(G0)
+
+    G1s = GraphCoarse.coarse_0(G0)
+
+    for g in G1s:
+        print(g.T)
 
