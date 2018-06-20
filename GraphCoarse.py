@@ -50,13 +50,29 @@ def coarse_0(pixels_regions):
             if pixel.parent is None:
                 G1 = Region()
                 G1.addSubregion(pixel)
+                T = np.zeros((len(pixels_regions) * len(pixels_regions[0]), 1))
                 for sr in G1.subregions:
                     for nb in sr.neighbors:
                         if nb.parent is None:
                             res = nb.computeProbabilityofC(G1)
                             if res > PSI_MERGE:
                                 G1.addSubregion(nb)
+                                addT = np.zeros((len(pixels_regions) * len(pixels_regions[0]), 1))
+                                np.concatenate((T,addT),1)
+                G1.T = T
                 regions.append(G1)
+
+    for r in range(len(pixels_regions)):
+        for c in range(len(pixels_regions[0])):
+            pixel = pixels_regions[r][c]
+            for G1 in regions:
+                if pixel in G1.subregions:
+                    G1.T[pixels_regions[0]*r+c,G1.subregions.index(pixel)] = 1
+                else:
+                    for subregion in G1.subregions:
+                        if subregion.isNeighbor(pixel):
+                            G1.T[pixels_regions[0] * r + c, G1.subregions.index(subregion)] = pixel.coarseNeighborhood(subregion)
+
 
     #assign nighbors to new regions
     process_neighbors(regions)
