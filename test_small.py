@@ -7,13 +7,19 @@ import random
 
 SHAPE = (10,10)
 
-def debug_region(region):
+def debug_region(reg,image,Gid):
+    if reg.pixel:
+        row = int(reg.id / SHAPE[1])
+        col = reg.id - row * SHAPE[1]
+        image[row, col] = Gid
+    else:
+        for sr in reg.subregions:
+            debug_region(sr,image,Gid)
+
+def debug(region):
     image = np.zeros(SHAPE)
-    for g in region:
-        for s in g.subregions:
-            r = int(s.id / SHAPE[1])
-            c = s.id - r * SHAPE[1]
-            image[r,c] = g.id
+    for reg in region:
+        debug_region(reg,image,reg.id)
     print(image)
 
 if __name__ == '__main__':
@@ -23,30 +29,24 @@ if __name__ == '__main__':
             image[r,c] = 100 if c < 5 else 0
 
     image[3:6,3:7] = 50
-    image[4:6,3:7] = 48
+    # image[4:6,3:7] = 48
 
     print("Image:",image)
 
     G0 = GraphCoarse.image_to_graph(image)
 
-    G1s = GraphCoarse.coarse_0(G0)
+    debug(G0)
 
-    debug_region(G1s)
+    Gs = GraphCoarse.coarse_0(G0)
 
-    Gs = GraphCoarse.coarse(G1s)
+    debug(Gs)
+
+    if len(Gs) != 2:
+        complete = False
+        while complete == False:
+            Gs = GraphCoarse.coarse(Gs)
+            if len(Gs) <= 2:
+                complete = True
+
 
     print(len(Gs))
-
-    # debug_region(Gs)
-
-    # complete = False
-    # Gsd = G1s
-    # while complete == False:
-    #     Gs = GraphCoarse.coarse(Gsd)
-    #     if len(Gs) == len(Gsd):
-    #         complete = True
-    #     else:
-    #         Gsd = Gs
-
-
-    # print(len(Gsd))

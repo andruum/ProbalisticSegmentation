@@ -3,16 +3,23 @@ import math
 
 import Region
 
-def get_sparseness(R):
-   G = R.getHist()
-   # n1 = norm_1(G)
-   n1 = 1
-   n2 = np.linalg.norm(G,ord=2)
-   n = len(G)-1
-   if n == 1:
-       return 2
-   S = (1/(math.sqrt(n)-1))*(math.sqrt(n)-n1/n2)
 
+#texture probability utils
+def getHist(pixels):
+    pixels = [1]
+    return np.bincount(pixels,minlength=256)/len(pixels)
+
+
+def get_sparseness(R):
+   pixels = R.getPixels()
+
+   G = getHist(pixels)
+
+   norm1 = np.linalg.norm(G,ord=1)
+   norm2 = np.linalg.norm(G,ord=2)
+   n = len(G)
+
+   S = (1/(math.sqrt(n)-1))*(math.sqrt(n)-norm1/norm2)
    return S
 
 def prob_cue_R(R):
@@ -32,8 +39,10 @@ def prob_cue_R(R):
     res = 1/(1-math.exp(pow))
     if res < 0:
         res = 0
+    if res > 1:
+        res = 1
     if res == 0:
-        print()
+        #print()
         pass
     return res
 
@@ -42,16 +51,19 @@ def prob_cue_1(Ri,Rj):
     p_cue_rj = prob_cue_R(Rj)
     res = min(p_cue_ri,p_cue_rj)
     if res==0:
-        print()
+        #print()
         pass
     return res
 
+
+#prior
 def prior(Ri,Rj):
     len = Region.getCommonLen(Ri,Rj)
     total_len_i = Ri.getTotalBoundary()
     total_len_j = Rj.getTotalBoundary()
     total_len_min = min(total_len_i,total_len_j)
     return len/total_len_min
+
 
 def normpdf(x, mean, sd):
     var = float(sd)**2
@@ -60,7 +72,7 @@ def normpdf(x, mean, sd):
     num = math.exp(-(float(x)-float(mean))**2/(2*var))
     return num/denom
 
-SIGMA_NOISE = 1
+SIGMA_NOISE = 0.5
 
 def likehood_intensity_p(Ri,Rj):
     delta_ij = abs(Ri.getIntensity() - Rj.getIntensity())
@@ -82,6 +94,10 @@ def likehood_intensity_p(Ri,Rj):
 
     res = normpdf(delta_ij,0,sigma_p_ij)
 
+    if not Ri.pixel:
+        # print()
+        pass
+
     return res
 
 def likehood_intensity_m(Ri,Rj):
@@ -101,6 +117,10 @@ def likehood_intensity_m(Ri,Rj):
     sigma_m_ij = sigma_m_local+simga_scale
 
     res = normpdf(delta_ij,0,sigma_m_ij)
+
+    if not Ri.pixel:
+        # print()
+        pass
 
     return res
 
@@ -123,7 +143,8 @@ def likehood_texture_p(Ri,Rj):
     res = 0
 
     if not Ri.pixel:
-        print()
+        #print()
+        pass
 
     if minD == 0 and Dij == 0:
         alpha_p = k - 2
@@ -183,9 +204,9 @@ def prob_sp_cue(Ri, Rj, cue):
 #main function
 def prob_sp(Ri, Rj):
     res = 0
-    cues = ["intensity","texture"]
+    # cues = ["intensity","texture"]
     # cues = ["texture"]
-    # cues = ["intensity"]
+    cues = ["intensity"]
     for cue in cues:
         p_cue = prob_cue_1(Ri,Rj)
         if cue == "texture":
@@ -193,5 +214,6 @@ def prob_sp(Ri, Rj):
             if p_cue != 0:
                 # print()
                 pass
-        res += prob_sp_cue(Ri,Rj,cue)*p_cue
+        prob_sp_cue_p = prob_sp_cue(Ri,Rj,cue)
+        res += prob_sp_cue_p*p_cue
     return res

@@ -48,6 +48,41 @@ class Region:
         self.subregions.append(subregion)
         subregion.parent = self
 
+    def getPixels(self):
+        pixels = []
+        if self.pixel:
+            pixels.append(self.value)
+        else:
+            for sr in self.subregions:
+                pixels.extend(sr.getPixels())
+        return pixels
+
+    def getTotalPixels(self):
+        return len(self.getPixels())
+
+    # direction 0 upper ,1 right ,2 down ,3 left. for pixels
+    def addNeighbor(self, region, direction=-1):
+        if self.pixel:
+            if direction == -1:
+                print("Error direction == -1 for pixel")
+            self.directions.append(direction)
+        self.neighbors.append(region)
+
+    def processNeighbors(self):
+        for sr in self.subregions:
+            for nb in sr.neighbors:
+                if nb.parent != self and nb.parent not in self.neighbors:
+                    self.addNeighbor(nb.parent)
+
+    def isNeighbor(self,other):
+        return True if other in self.neighbors else False
+
+    def getTotalBoundary(self):
+        res = 0
+        for n in self.neighbors:
+            res += getCommonLen(self,n)
+        return res
+
     def getIntensity(self):
         if self.pixel:
             return self.value
@@ -63,6 +98,8 @@ class Region:
             return self.edges_res
         else:
             return self.edges_res
+
+
 
     def getTextureDifferenceP(self):
         Dijs = []
@@ -81,39 +118,7 @@ class Region:
         return res
 
 
-    def getPixels(self):
-        pixels = []
-        if self.pixel:
-            pixels.append(self.value)
-        else:
-            for sr in self.subregions:
-                pixels.extend(sr.getPixels())
-        return pixels
 
-    def getTotalPixels(self):
-        return len(self.getPixels())
-
-    def getHist(self):
-        pixels = self.getPixels()
-        return np.bincount([len(pixels)])/len(pixels)
-
-    # direction 0 upper ,1 right ,2 down ,3 left. for pixels
-    def addNeighbor(self,region,direction=-1):
-        if self.pixel:
-            if direction == -1:
-                print("Error direction == -1 for pixel")
-            self.directions.append(direction)
-        self.neighbors.append(region)
-
-    def calc_weights(self):
-        for R in self.neighbors:
-            self.weights.append(probability_framework.prob_sp(self,R))
-
-    def getTotalBoundary(self):
-        res = 0
-        for n in self.neighbors:
-            res += getCommonLen(self,n)
-        return res
 
     def externalPDifference(self):
         diffs = []
@@ -130,6 +135,9 @@ class Region:
         res = len_d/self.getTotalBoundary()
         return res
 
+
+
+
     def computeProbabilityofC(self, target_parent):
         cp = 0
         vp = 0
@@ -141,14 +149,9 @@ class Region:
             return 0
         return cp/vp
 
-    def processNeighbors(self):
-        for sr in self.subregions:
-            for nb in sr.neighbors:
-                if nb.parent != self and nb.parent not in self.neighbors:
-                    self.addNeighbor(nb.parent)
-
-    def isNeighbor(self,other):
-        return True if other in self.neighbors else False
+    def calc_weights(self):
+        for R in self.neighbors:
+            self.weights.append(probability_framework.prob_sp(self,R))
 
     def coarseNeighborhood(self,Cregion):
         p = 0
@@ -160,3 +163,4 @@ class Region:
         if psum==0:
             return 0
         return p/psum
+
