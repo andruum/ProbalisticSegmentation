@@ -46,7 +46,9 @@ def process_neighbors(regions):
         r.processNeighbors()
 
 def calc_weights(regions):
+    print("Calc weights ",len(regions))
     for i,r in enumerate(regions):
+        print("Pixels ", len(r.subregions))
         r.calc_weights()
         print(i/len(regions))
 
@@ -89,8 +91,7 @@ def coarse_0(pixels_regions):
 
     id = 0
 
-    for i,pixel in enumerate(pixels_regions):
-        print(i/len(pixels_regions))
+    for pixel in pixels_regions:
         if pixel.parent is None:
             G1 = Region(id=id)
             id +=1
@@ -103,21 +104,21 @@ def coarse_0(pixels_regions):
                             G1.addSubregion(nb)
             regions.append(G1)
 
+    print("Calc values")
+
     for G1 in regions:
         tqsum = 0
         tesum = np.zeros((4,1))
         tsum = 0
-        for pixel in pixels_regions:
-            if pixel in G1.subregions:
-                tsum += 1
-                tqsum += pixel.value
-                tesum += pixel.getEdgeResponse()
-            else:
-                for subregion in G1.subregions:
-                    if subregion.isNeighbor(pixel):
-                        tsum += pixel.coarseNeighborhood(subregion)
-                        tqsum += pixel.coarseNeighborhood(subregion)*pixel.value
-                        tesum += pixel.coarseNeighborhood(subregion)*pixel.getEdgeResponse()
+        for pixel in G1.subregions:
+            tsum += 1
+            tqsum += pixel.value
+            tesum += pixel.getEdgeResponse()
+            for nb in pixel.neighbors:
+                if nb.parent != G1:
+                    tsum += nb.coarseNeighborhood(pixel)
+                    tqsum += nb.coarseNeighborhood(pixel)*nb.value
+                    tesum += nb.coarseNeighborhood(pixel)*nb.getEdgeResponse()
 
         G1.value = tqsum/tsum
         G1.edges_res = tesum/tsum

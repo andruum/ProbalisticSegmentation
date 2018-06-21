@@ -17,16 +17,15 @@ def getTextureDifference(Ri, Rj):
 
 def getCommonLen(Ri,Rj):
     res = 0
-    if Ri.pixel != Rj.pixel:
-        raise Exception("Regions has different type")
 
-    if not Ri.pixel:
+    if Ri.pixel == False:
         for sri in Ri.subregions:
             for srj in Rj.subregions:
-                res += getCommonLen(sri,srj)
+                if sri.pixel == False:
+                    res += getCommonLen(sri,srj)
+
     else:
         for pj in Rj.neighbors:
-            # print("ids",self.id,pi.id,pj.id)
             res += 1 if (Ri == pj) else 0
     return res
 
@@ -56,25 +55,36 @@ class Region:
         self.Ttqsum = 0
         self.Ttsum = 0
 
-
-
         self.edges_res = None
-
         self.externalPDifference_ = None
         self.externalMDifference_ = None
+        self.total_boundaries = None
+        self.pixels = None
+        self.texture_diff_p = None
+        self.texture_diff_m = None
+
 
     def addSubregion(self, subregion):
         self.subregions.append(subregion)
         subregion.parent = self
 
+
     def getPixels(self):
-        pixels = []
-        if self.pixel:
-            pixels.append(self.value)
-        else:
-            for sr in self.subregions:
-                pixels.extend(sr.getPixels())
-        return pixels
+        if self.pixels is None:
+            self.pixels = []
+            if self.pixel:
+                self.pixels.append(self.value)
+            else:
+                for sr in self.subregions:
+                    self.pixels.extend(sr.getPixels())
+        return self.pixels
+
+    def getBoundaryPixels(self):
+        if self.boundary_pixels is None:
+            for p in self.pixels:
+                if
+
+        return self.boundary_pixels
 
     def getTotalPixels(self):
         if self.pixel:
@@ -99,17 +109,16 @@ class Region:
         return True if other in self.neighbors else False
 
     def getTotalBoundary(self):
-        res = 0
-        for n in self.neighbors:
-            res += getCommonLen(self,n)
-        res += getFreeLen(self)
-        return res
+        if self.total_boundaries is None:
+            self.total_boundaries = 0
+            for n in self.neighbors:
+                self.total_boundaries += getCommonLen(self,n)
+            self.total_boundaries += getFreeLen(self)
+
+        return self.total_boundaries
 
     def getIntensity(self):
-        if self.pixel:
-            return self.value
-        else:
-            return self.value
+        return self.value
 
     def getEdgeResponse(self):
         if self.pixel:
@@ -124,20 +133,21 @@ class Region:
 
 
     def getTextureDifferenceP(self):
-        Dijs = []
-        for nb in self.neighbors:
-            Dijs.append(getTextureDifference(self,nb))
-
-        res = min(Dijs)
-        return res
+        if self.texture_diff_p is None:
+            Dijs = []
+            for nb in self.neighbors:
+                Dijs.append(getTextureDifference(self,nb))
+            self.texture_diff_p = min(Dijs)
+        return self.texture_diff_p
 
     def getTextureDifferenceM(self):
-        len_d = 0
-        for nb in self.neighbors:
-            len_d += getCommonLen(self,nb) * getTextureDifference(self,nb)
-        res = len_d / self.getTotalBoundary()
+        if self.texture_diff_m is None:
+            len_d = 0
+            for nb in self.neighbors:
+                len_d += getCommonLen(self,nb) * getTextureDifference(self,nb)
+            self.texture_diff_m = len_d / self.getTotalBoundary()
 
-        return res
+        return self.texture_diff_m
 
 
 
