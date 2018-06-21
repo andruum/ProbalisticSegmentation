@@ -5,7 +5,7 @@ import GraphCoarse
 
 import random
 
-SHAPE = (20,20)
+SHAPE = (10,10)
 
 def debug_region(region):
     image = np.zeros(SHAPE)
@@ -22,6 +22,9 @@ if __name__ == '__main__':
         for c in range(image.shape[1]):
             image[r,c] = 100 if c < 5 else 0
 
+    image[3:6,3:7] = 50
+    image[4:6,3:7] = 48
+
     print("Image:",image)
 
     G0 = GraphCoarse.image_to_graph(image)
@@ -29,6 +32,12 @@ if __name__ == '__main__':
     G1s = GraphCoarse.coarse_0(G0)
 
     debug_region(G1s)
+
+    Gs = GraphCoarse.coarse(G1s)
+
+    print(len(Gs))
+
+    # debug_region(Gs)
 
     # complete = False
     # Gsd = G1s
@@ -38,5 +47,6 @@ if __name__ == '__main__':
     #         complete = True
     #     else:
     #         Gsd = Gs
-    #
+
+
     # print(len(Gsd))

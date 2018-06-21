@@ -23,15 +23,27 @@ def prob_cue_R(R):
 
     if -(a*sparseness+b) < 0:
         pass
-    res = 1/(1-math.exp(-(a*sparseness+b)))
+
+    pow = -(a*sparseness+b)
+
+    if pow>700:
+        pow = 700
+
+    res = 1/(1-math.exp(pow))
     if res < 0:
         res = 0
+    if res == 0:
+        print()
+        pass
     return res
 
 def prob_cue_1(Ri,Rj):
     p_cue_ri = prob_cue_R(Ri)
     p_cue_rj = prob_cue_R(Rj)
     res = min(p_cue_ri,p_cue_rj)
+    if res==0:
+        print()
+        pass
     return res
 
 def prior(Ri,Rj):
@@ -48,6 +60,8 @@ def normpdf(x, mean, sd):
     num = math.exp(-(float(x)-float(mean))**2/(2*var))
     return num/denom
 
+SIGMA_NOISE = 1
+
 def likehood_intensity_p(Ri,Rj):
     delta_ij = abs(Ri.getIntensity() - Rj.getIntensity())
 
@@ -61,7 +75,7 @@ def likehood_intensity_p(Ri,Rj):
 
     omega_min = min(omega_i,omega_j)
 
-    sigma_noise = 0.5
+    sigma_noise = SIGMA_NOISE
     simga_scale = sigma_noise/math.sqrt(omega_min)
 
     sigma_p_ij = sigma_p_local+simga_scale
@@ -82,7 +96,7 @@ def likehood_intensity_m(Ri,Rj):
     omega_i = Ri.getTotalPixels()
     omega_j = Rj.getTotalPixels()
     omega_min = min(omega_i,omega_j)
-    sigma_noise = 0.5
+    sigma_noise = SIGMA_NOISE
     simga_scale = sigma_noise/math.sqrt(omega_min)
     sigma_m_ij = sigma_m_local+simga_scale
 
@@ -107,6 +121,10 @@ def likehood_texture_p(Ri,Rj):
 
     alpha_p = 0
     res = 0
+
+    if not Ri.pixel:
+        print()
+
     if minD == 0 and Dij == 0:
         alpha_p = k - 2
         res = chi_square(alpha_p, k)
@@ -173,6 +191,7 @@ def prob_sp(Ri, Rj):
         if cue == "texture":
             p_cue = 1 - p_cue
             if p_cue != 0:
+                # print()
                 pass
         res += prob_sp_cue(Ri,Rj,cue)*p_cue
     return res

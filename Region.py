@@ -137,6 +137,8 @@ class Region:
             if nb.parent == target_parent:
                 cp += w
             vp += w
+        if vp == 0:
+            return 0
         return cp/vp
 
     def processNeighbors(self):
@@ -155,4 +157,6 @@ class Region:
             if Cregion == nb:
                 p = w
             psum+=w
+        if psum==0:
+            return 0
         return p/psum
