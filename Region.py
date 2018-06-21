@@ -45,14 +45,23 @@ class Region:
         self.weights = []
         self.subregions = []
         self.pixel = pixel
-        self.value = value
+        self.value = int(value)
         self.neighbors = []
         self.directions = []
         self.parent = None
 
         self.id  = id
         self.T = None
+
+        self.Ttqsum = 0
+        self.Ttsum = 0
+
+
+
         self.edges_res = None
+
+        self.externalPDifference_ = None
+        self.externalMDifference_ = None
 
     def addSubregion(self, subregion):
         self.subregions.append(subregion)
@@ -68,6 +77,8 @@ class Region:
         return pixels
 
     def getTotalPixels(self):
+        if self.pixel:
+            return 1
         return len(self.getPixels())
 
     # direction 0 upper ,1 right ,2 down ,3 left. for pixels
@@ -103,9 +114,9 @@ class Region:
     def getEdgeResponse(self):
         if self.pixel:
             if self.edges_res is None:
-                self.edges_res = [0,0,0,0]
+                self.edges_res = np.zeros((4,1))
                 for nb,dir in zip(self.neighbors,self.directions):
-                    self.edges_res[dir] = 2*abs(nb.value-self.value)
+                    self.edges_res[dir,0] = 2*abs(nb.value-self.value)
             return self.edges_res
         else:
             return self.edges_res
@@ -132,19 +143,23 @@ class Region:
 
 
     def externalPDifference(self):
-        diffs = []
-        for nb in self.neighbors:
-            dif = abs(self.getIntensity() - nb.getIntensity())
-            diffs.append(dif)
-        res = min(diffs)
-        return res
+        if self.externalPDifference_ is None:
+            diffs = []
+            for nb in self.neighbors:
+                dif = abs(self.getIntensity() - nb.getIntensity())
+                diffs.append(dif)
+            self.externalPDifference_ = min(diffs)
+
+        return self.externalPDifference_
 
     def externalMDifference(self):
-        len_d = 0
-        for nb in self.neighbors:
-            len_d += getCommonLen(self,nb)*abs(self.getIntensity() - nb.getIntensity())
-        res = len_d/(self.getTotalBoundary()-getFreeLen(self))
-        return res
+        if self.externalMDifference_ is None:
+            len_d = 0
+            for nb in self.neighbors:
+                len_d += getCommonLen(self,nb)*abs(self.getIntensity() - nb.getIntensity())
+            self.externalMDifference_ = len_d/(self.getTotalBoundary()-getFreeLen(self))
+
+        return self.externalMDifference_
 
 
 
@@ -162,7 +177,12 @@ class Region:
 
     def calc_weights(self):
         for R in self.neighbors:
-            self.weights.append(probability_framework.prob_sp(self,R))
+            id = R.neighbors.index(self)
+            if len(R.weights)-1 == id:
+                w = R.weights[id]
+            else:
+                w = probability_framework.prob_sp(self,R)
+            self.weights.append(w)
 
     def coarseNeighborhood(self,Cregion):
         p = 0

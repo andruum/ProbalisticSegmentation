@@ -78,7 +78,6 @@ def normpdf(x, mean, sd):
     return num/denom
 
 
-
 def likehood_intensity_p(Ri,Rj):
     delta_ij = abs(Ri.getIntensity() - Rj.getIntensity())
 
@@ -99,14 +98,6 @@ def likehood_intensity_p(Ri,Rj):
 
     res = normpdf(delta_ij,0,sigma_p_ij)
 
-    if Ri.value != Rj.value:
-        # print()
-        pass
-
-    if not Ri.pixel:
-        # print()
-        pass
-
     return res
 
 def likehood_intensity_m(Ri,Rj):
@@ -126,14 +117,6 @@ def likehood_intensity_m(Ri,Rj):
     sigma_m_ij = sigma_m_local+simga_scale
 
     res = normpdf(delta_ij,0,sigma_m_ij)
-
-    if Ri.value != Rj.value:
-        # print()
-        pass
-
-    if not Ri.pixel:
-        # print()
-        pass
 
     return res
 
@@ -169,8 +152,6 @@ def likehood_texture_p(Ri,Rj):
         res = chi_square(Dij / alpha_p, k)
 
 
-    # if res ==0:
-    #     print("Error?")
     return res
 
 def likehood_texture_m(Ri,Rj):
@@ -189,49 +170,41 @@ def likehood_texture_m(Ri,Rj):
 
     res = chi_square(Dij/alpha_m,k)
 
-    # if res ==0:
-    #     print("Error?")
 
     return res
 
 
-likehoods_p = {"intensity":likehood_intensity_p,"texture":likehood_texture_p}
-likehoods_m = {"intensity":likehood_intensity_m,"texture":likehood_texture_m}
-
-def prob_sp_cue(Ri, Rj, cue):
-    likehood_p = likehoods_p[cue]
-    likehood_m = likehoods_m[cue]
-    lm = likehood_m(Ri,Rj)
-    lp = likehood_p(Ri,Rj)
+def prob_sp_cue_t(Ri, Rj):
+    lm = likehood_texture_m(Ri,Rj)
+    lp = likehood_texture_p(Ri,Rj)
 
     p_sp = prior(Ri,Rj)
     p_sm = 1 - p_sp
 
-    # if (lp*p_sp+lm*p_sm) == 0:
-    #     print("Error")
-
     res = lp*p_sp/(lp*p_sp+lm*p_sm)
 
-    if not Ri.pixel:
-        # print()
-        pass
+    return res
 
-    if Ri.value != Rj.value:
-        # print()
-        pass
+def prob_sp_cue_i(Ri, Rj):
+    lm = likehood_intensity_m(Ri,Rj)
+    lp = likehood_intensity_p(Ri,Rj)
+
+    p_sp = prior(Ri,Rj)
+    p_sm = 1 - p_sp
+
+    res = lp*p_sp/(lp*p_sp+lm*p_sm)
 
     return res
 
 #main function
 def prob_sp(Ri, Rj):
     res = 0
-    for cue in CUES:
-        p_cue = prob_cue_1(Ri,Rj)
-        if cue == "texture":
-            p_cue = 1 - p_cue
-            if p_cue != 0:
-                # print()
-                pass
-        prob_sp_cue_p = prob_sp_cue(Ri,Rj,cue)
-        res += prob_sp_cue_p*p_cue
+
+    if not Ri.pixel:
+        p_cue_i = prob_cue_1(Ri, Rj)
+        p_cue_t = 1 - p_cue_i
+        res = p_cue_i*prob_sp_cue_i(Ri, Rj)+prob_sp_cue_t(Ri, Rj)*p_cue_t
+    else:
+        res = prob_sp_cue_i(Ri, Rj)
+
     return res

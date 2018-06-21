@@ -4,6 +4,8 @@ from Region import Region
 
 PSI_MERGE = 0.3
 
+
+
 def image_to_graph(image):
     pixels = []
     for i in range(image.shape[0]):
@@ -11,7 +13,6 @@ def image_to_graph(image):
             reg = Region(True, image[i,j],i*(image.shape[0])+j)
             pixels.append(reg)
 
-    rows = image.shape[0]
     cols = image.shape[1]
 
     for i in range(len(pixels)):
@@ -34,9 +35,9 @@ def image_to_graph(image):
                 id = r * cols + c+1
                 nb = pixels[id]
                 pixel.addNeighbor(nb, 1)
+            pixel.getEdgeResponse()
 
-    for pixel in pixels:
-        pixel.calc_weights()
+    calc_weights(pixels)
 
     return pixels
 
@@ -45,8 +46,9 @@ def process_neighbors(regions):
         r.processNeighbors()
 
 def calc_weights(regions):
-    for r in regions:
+    for i,r in enumerate(regions):
         r.calc_weights()
+        print(i/len(regions))
 
 
 
@@ -87,38 +89,39 @@ def coarse_0(pixels_regions):
 
     id = 0
 
-    for pixel in pixels_regions:
+    for i,pixel in enumerate(pixels_regions):
+        print(i/len(pixels_regions))
         if pixel.parent is None:
             G1 = Region(id=id)
             id +=1
             G1.addSubregion(pixel)
-            T = np.zeros((len(pixels_regions), 1))
             for sr in G1.subregions:
                 for nb in sr.neighbors:
                     if nb.parent is None:
                         res = nb.computeProbabilityofC(G1)
                         if res > PSI_MERGE:
                             G1.addSubregion(nb)
-                            #addT = np.zeros((len(pixels_regions) * len(pixels_regions[0]), 1))
-                            # print(addT.shape)
-                            # print(T.shape)
-                            #T = np.concatenate([T,addT],1)
-            G1.T = T
             regions.append(G1)
 
-    for i,pixel in enumerate(pixels_regions):
-        for G1 in regions:
+    for G1 in regions:
+        tqsum = 0
+        tesum = np.zeros((4,1))
+        tsum = 0
+        for pixel in pixels_regions:
             if pixel in G1.subregions:
-                G1.T[i] = 1
+                tsum += 1
+                tqsum += pixel.value
+                tesum += pixel.getEdgeResponse()
             else:
                 for subregion in G1.subregions:
                     if subregion.isNeighbor(pixel):
-                        G1.T[i] = pixel.coarseNeighborhood(subregion)
+                        tsum += pixel.coarseNeighborhood(subregion)
+                        tqsum += pixel.coarseNeighborhood(subregion)*pixel.value
+                        tesum += pixel.coarseNeighborhood(subregion)*pixel.getEdgeResponse()
 
+        G1.value = tqsum/tsum
+        G1.edges_res = tesum/tsum
 
-    for G1 in regions:
-        G1.value = calcQ0I(G1.T,pixels_regions)
-        G1.edges_res = calcQ0E(G1.T,pixels_regions)
     #assign nighbors to new regions
     process_neighbors(regions)
     calc_weights(regions)

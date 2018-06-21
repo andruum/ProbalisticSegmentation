@@ -5,7 +5,7 @@ import GraphCoarse
 
 import random
 
-SHAPE = (100,100)
+SHAPE = (10,10)
 
 def debug_region(reg,image,Gid):
     if reg.pixel:
@@ -22,26 +22,32 @@ def debug(region):
         debug_region(reg,image,reg.id)
     print(image)
 
-if __name__ == '__main__':
+def getImage():
+    image = cv2.imread('test2.jpg', 0)
+    return image
+
+def getTestArray():
     image = np.zeros(SHAPE)
+
     for r in range(image.shape[0]):
         for c in range(image.shape[1]):
-            image[r,c] = 100 if c < 5 else 0
+            image[r,c] = 100 if c < SHAPE[0]/2 else 0
+    return image
 
-    image[1:4,2:4] = 0
+if __name__ == '__main__':
 
-    print("Image:",image)
+    image = getImage()
 
     G0 = GraphCoarse.image_to_graph(image)
 
     Gs = GraphCoarse.coarse_0(G0)
 
-    debug(Gs)
-
+    #debug(Gs)
+    len(Gs)
 
     Gs = GraphCoarse.coarse(Gs)
 
-    debug(Gs)
+    #debug(Gs)
     #
     # if len(Gs) != 2:
     #     complete = False
