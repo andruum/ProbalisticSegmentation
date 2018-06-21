@@ -50,7 +50,7 @@ class Region:
         if self.pixel:
             return self.value
         else:
-            # for i in T
+
             return 0
             # add scale matrix TODO
 

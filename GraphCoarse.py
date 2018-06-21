@@ -45,6 +45,14 @@ def calc_weights(regions):
 
 PSI_MERGE = 0.4
 
+def calcQ0(T,pixels):
+    rows = len(pixels)
+    cols = len(pixels[0])
+    tqsum = 0
+    tsum = 0
+    for i,id in enumerate(T):
+        tqsum += i*pixels[rows][]
+
 def coarse_0(pixels_regions):
     regions = []
     for r in range(len(pixels_regions)):
