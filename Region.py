@@ -30,6 +30,16 @@ def getCommonLen(Ri,Rj):
             res += 1 if (Ri == pj) else 0
     return res
 
+def getFreeLen(R):
+    res = 0
+    if not R.pixel:
+        for sr in R.subregions:
+            res += getFreeLen(sr)
+    else:
+        res += 4 - len(R.neighbors)
+    return res
+
+
 class Region:
     def __init__(self,pixel=False,value = -1, id = -1):
         self.weights = []
@@ -77,14 +87,11 @@ class Region:
     def isNeighbor(self,other):
         return True if other in self.neighbors else False
 
-    def getPixelsWithNullBoundary(self):
-
-
     def getTotalBoundary(self):
         res = 0
         for n in self.neighbors:
             res += getCommonLen(self,n)
-
+        res += getFreeLen(self)
         return res
 
     def getIntensity(self):
@@ -98,7 +105,7 @@ class Region:
             if self.edges_res is None:
                 self.edges_res = [0,0,0,0]
                 for nb,dir in zip(self.neighbors,self.directions):
-                    self.edges_res[dir] = abs(nb.value-self.value)
+                    self.edges_res[dir] = 2*abs(nb.value-self.value)
             return self.edges_res
         else:
             return self.edges_res
@@ -136,7 +143,7 @@ class Region:
         len_d = 0
         for nb in self.neighbors:
             len_d += getCommonLen(self,nb)*abs(self.getIntensity() - nb.getIntensity())
-        res = len_d/self.getTotalBoundary()
+        res = len_d/(self.getTotalBoundary()-getFreeLen(self))
         return res
 
 

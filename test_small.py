@@ -5,7 +5,7 @@ import GraphCoarse
 
 import random
 
-SHAPE = (10,10)
+SHAPE = (100,100)
 
 def debug_region(reg,image,Gid):
     if reg.pixel:
@@ -28,8 +28,7 @@ if __name__ == '__main__':
         for c in range(image.shape[1]):
             image[r,c] = 100 if c < 5 else 0
 
-    image[3:6,3:7] = 50
-    # image[4:6,3:7] = 48
+    image[1:4,2:4] = 0
 
     print("Image:",image)
 
@@ -39,7 +38,8 @@ if __name__ == '__main__':
 
     debug(Gs)
 
-  #  Gs = GraphCoarse.coarse(Gs)
+
+    Gs = GraphCoarse.coarse(Gs)
 
     debug(Gs)
     #

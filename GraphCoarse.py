@@ -2,7 +2,7 @@ import numpy as np
 from Region import Region
 
 
-PSI_MERGE = 0.2
+PSI_MERGE = 0.3
 
 def image_to_graph(image):
     pixels = []

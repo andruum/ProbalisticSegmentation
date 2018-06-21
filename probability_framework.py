@@ -3,10 +3,10 @@ import math
 
 import Region
 
-SIGMA_NOISE = 4
-# CUES = ["intensity","texture"]
+SIGMA_NOISE = 7
+CUES = ["intensity","texture"]
 # CUES = ["texture"]
-CUES = ["intensity"]
+#CUES = ["intensity"]
 
 
 #texture probability utils
@@ -99,8 +99,12 @@ def likehood_intensity_p(Ri,Rj):
 
     res = normpdf(delta_ij,0,sigma_p_ij)
 
+    if Ri.value != Rj.value:
+        # print()
+        pass
+
     if not Ri.pixel:
-        print()
+        # print()
         pass
 
     return res
@@ -123,8 +127,12 @@ def likehood_intensity_m(Ri,Rj):
 
     res = normpdf(delta_ij,0,sigma_m_ij)
 
+    if Ri.value != Rj.value:
+        # print()
+        pass
+
     if not Ri.pixel:
-        print()
+        # print()
         pass
 
     return res
@@ -205,7 +213,11 @@ def prob_sp_cue(Ri, Rj, cue):
     res = lp*p_sp/(lp*p_sp+lm*p_sm)
 
     if not Ri.pixel:
-        print()
+        # print()
+        pass
+
+    if Ri.value != Rj.value:
+        # print()
         pass
 
     return res
