@@ -35,18 +35,20 @@ if __name__ == '__main__':
 
     G0 = GraphCoarse.image_to_graph(image)
 
-    debug(G0)
-
     Gs = GraphCoarse.coarse_0(G0)
 
     debug(Gs)
 
-    if len(Gs) != 2:
-        complete = False
-        while complete == False:
-            Gs = GraphCoarse.coarse(Gs)
-            if len(Gs) <= 2:
-                complete = True
+  #  Gs = GraphCoarse.coarse(Gs)
 
-
-    print(len(Gs))
+    debug(Gs)
+    #
+    # if len(Gs) != 2:
+    #     complete = False
+    #     while complete == False:
+    #         Gs = GraphCoarse.coarse(Gs)
+    #         if len(Gs) <= 2:
+    #             complete = True
+    #
+    #
+    # print(len(Gs))

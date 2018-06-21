@@ -77,10 +77,14 @@ class Region:
     def isNeighbor(self,other):
         return True if other in self.neighbors else False
 
+    def getPixelsWithNullBoundary(self):
+
+
     def getTotalBoundary(self):
         res = 0
         for n in self.neighbors:
             res += getCommonLen(self,n)
+
         return res
 
     def getIntensity(self):

@@ -1,6 +1,9 @@
 import numpy as np
 from Region import Region
 
+
+PSI_MERGE = 0.2
+
 def image_to_graph(image):
     pixels = []
     for i in range(image.shape[0]):
@@ -45,7 +48,7 @@ def calc_weights(regions):
     for r in regions:
         r.calc_weights()
 
-PSI_MERGE = 0.2
+
 
 def calcQ0I(T,pixels):
     tqsum = 0

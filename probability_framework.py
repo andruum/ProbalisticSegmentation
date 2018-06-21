@@ -3,6 +3,11 @@ import math
 
 import Region
 
+SIGMA_NOISE = 4
+# CUES = ["intensity","texture"]
+# CUES = ["texture"]
+CUES = ["intensity"]
+
 
 #texture probability utils
 def getHist(pixels):
@@ -72,7 +77,7 @@ def normpdf(x, mean, sd):
     num = math.exp(-(float(x)-float(mean))**2/(2*var))
     return num/denom
 
-SIGMA_NOISE = 0.5
+
 
 def likehood_intensity_p(Ri,Rj):
     delta_ij = abs(Ri.getIntensity() - Rj.getIntensity())
@@ -95,7 +100,7 @@ def likehood_intensity_p(Ri,Rj):
     res = normpdf(delta_ij,0,sigma_p_ij)
 
     if not Ri.pixel:
-        # print()
+        print()
         pass
 
     return res
@@ -119,7 +124,7 @@ def likehood_intensity_m(Ri,Rj):
     res = normpdf(delta_ij,0,sigma_m_ij)
 
     if not Ri.pixel:
-        # print()
+        print()
         pass
 
     return res
@@ -199,15 +204,16 @@ def prob_sp_cue(Ri, Rj, cue):
 
     res = lp*p_sp/(lp*p_sp+lm*p_sm)
 
+    if not Ri.pixel:
+        print()
+        pass
+
     return res
 
 #main function
 def prob_sp(Ri, Rj):
     res = 0
-    # cues = ["intensity","texture"]
-    # cues = ["texture"]
-    cues = ["intensity"]
-    for cue in cues:
+    for cue in CUES:
         p_cue = prob_cue_1(Ri,Rj)
         if cue == "texture":
             p_cue = 1 - p_cue
