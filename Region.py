@@ -12,7 +12,7 @@ def getTextureDifference(Ri, Rj):
         if abs(hi[i]) + abs(hj[i]) != 0:
             Dij += math.pow((hi[i] - hj[i]) / (hi[i] + hj[i]), 2)
         else:
-            Dij += 255
+            Dij += 0
     return Dij
 
 def getCommonLen(Ri,Rj):
@@ -31,7 +31,7 @@ def getCommonLen(Ri,Rj):
     return res
 
 class Region:
-    def __init__(self,pixel=False,value = -1):
+    def __init__(self,pixel=False,value = -1, id = -1):
         self.weights = []
         self.subregions = []
         self.pixel = pixel
@@ -40,7 +40,9 @@ class Region:
         self.directions = []
         self.parent = None
 
+        self.id  = id
         self.T = None
+        self.edges_res = None
 
     def addSubregion(self, subregion):
         self.subregions.append(subregion)
@@ -50,20 +52,17 @@ class Region:
         if self.pixel:
             return self.value
         else:
-
-            return 0
-            # add scale matrix TODO
+            return self.value
 
     def getEdgeResponse(self):
-        res = []
         if self.pixel:
-            res = [0,0,0,0]
-            for nb,dir in zip(self.neighbors,self.directions):
-                res[dir] = abs(nb.value-self.value)
+            if self.edges_res is None:
+                self.edges_res = [0,0,0,0]
+                for nb,dir in zip(self.neighbors,self.directions):
+                    self.edges_res[dir] = abs(nb.value-self.value)
+            return self.edges_res
         else:
-            pass
-            #go deep TODO
-        return res
+            return self.edges_res
 
     def getTextureDifferenceP(self):
         Dijs = []
@@ -155,22 +154,5 @@ class Region:
         for nb,w in zip(self.neighbors,self.weights):
             if Cregion == nb:
                 p = w
-            if nb.parent == Cregion.parent:
-                psum+=w
+            psum+=w
         return p/psum
-
-
-# class Pixel:
-#
-#     def __init__(self,value,x,y):
-#         self.value = value
-#         self.x = x
-#         self.y = y
-#
-#     def isNeighbor(self,pixel):
-#         dx = abs(pixel.x - self.x)
-#         dy = abs(pixel.y - self.y)
-#         if dx+dy == 1:
-#             return 1
-#         else:
-#             return 0

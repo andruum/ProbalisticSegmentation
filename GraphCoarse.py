@@ -5,28 +5,8 @@ def image_to_graph(image):
     pixels = []
     for i in range(image.shape[0]):
         for j in range(image.shape[1]):
-            reg = Region(True, image[i,j])
+            reg = Region(True, image[i,j],i*(image.shape[0])+j)
             pixels.append(reg)
-
-    # print(image.shape)
-
-
-
-    # for r in range(image.shape[0]):
-    #     for c in range(image.shape[1]):
-    #         pixel = pixels[r][c]
-    #         if r != 0:
-    #             nb = pixels[r - 1][c]
-    #             pixel.addNeighbor(nb, 0)
-    #         if r != image.shape[0]-1:
-    #             nb = pixels[r + 1][c]
-    #             pixel.addNeighbor(nb, 2)
-    #         if c != 0:
-    #             nb = pixels[r][c - 1]
-    #             pixel.addNeighbor(nb, 3)
-    #         if c != image.shape[1]-1:
-    #             nb = pixels[r][c + 1]
-    #             pixel.addNeighbor(nb, 1)
 
     rows = image.shape[0]
     cols = image.shape[1]
@@ -65,22 +45,49 @@ def calc_weights(regions):
     for r in regions:
         r.calc_weights()
 
-PSI_MERGE = 0.4
+PSI_MERGE = 0.2
 
-# def calcQ0(T,pixels):
-#     rows = len(pixels)
-#     cols = len(pixels[0])
-#     tqsum = 0
-#     tsum = 0
-#     for id,i in enumerate(T):
-#         tqsum += i*pixels[rows][]
+def calcQ0I(T,pixels):
+    tqsum = 0
+    tsum = 0
+    for id,pv in enumerate(T):
+        tqsum += pv*pixels[id].value
+        tsum += pv
+    return tqsum/tsum
+
+def calcQsI(T,downregions):
+    tqsum = 0
+    tsum = 0
+    for id,pv in enumerate(T):
+        tqsum += pv*len(downregions[id].subregions)*downregions[id].value
+        tsum += pv*len(downregions[id].subregions)
+    return tqsum/tsum
+
+def calcQ0E(T,pixels):
+    tqsum = 0
+    tsum = 0
+    for id,pv in enumerate(T):
+        tqsum += pv*pixels[id].getEdgeResponse()
+        tsum += pv
+    return tqsum/tsum
+
+def calcQsE(T,downregions):
+    tqsum = 0
+    tsum = 0
+    for id,pv in enumerate(T):
+        tqsum += pv*len(downregions[id].subregions)*downregions[id].getEdgeResponse()
+        tsum += pv*len(downregions[id].subregions)
+    return tqsum/tsum
 
 def coarse_0(pixels_regions):
     regions = []
 
+    id = 0
+
     for pixel in pixels_regions:
         if pixel.parent is None:
-            G1 = Region()
+            G1 = Region(id=id)
+            id +=1
             G1.addSubregion(pixel)
             T = np.zeros((len(pixels_regions), 1))
             for sr in G1.subregions:
@@ -96,51 +103,6 @@ def coarse_0(pixels_regions):
             G1.T = T
             regions.append(G1)
 
-    # for r in range(len(pixels_regions)):
-    #     for c in range(len(pixels_regions[0])):
-    #         pixel = pixels_regions[r][c]
-    #         if pixel.parent is None:
-    #             G1 = Region()
-    #             G1.addSubregion(pixel)
-    #             T = np.zeros((len(pixels_regions) * len(pixels_regions[0]), 1))
-    #             for sr in G1.subregions:
-    #                 for nb in sr.neighbors:
-    #                     if nb.parent is None:
-    #                         res = nb.computeProbabilityofC(G1)
-    #                         if res > PSI_MERGE:
-    #                             G1.addSubregion(nb)
-    #                             #addT = np.zeros((len(pixels_regions) * len(pixels_regions[0]), 1))
-    #                             # print(addT.shape)
-    #                             # print(T.shape)
-    #                             #T = np.concatenate([T,addT],1)
-    #             G1.T = T
-    #             regions.append(G1)
-
-
-
-    # for G1 in regions:
-    #     for sr in G1.subregions:
-    #         for r in range(len(pixels_regions)):
-    #             for c in range(len(pixels_regions[0])):
-    #                 pixel = pixels_regions[r][c]
-    #                 if pixel.parent == G1:
-    #                     G1.T[len(pixels_regions[0]) * r + c] = 1
-    #                 elif sr.isNeighbor(pixel):
-    #                     G1.T[len(pixels_regions[0]) * r + c] = pixel.coarseNeighborhood(sr)
-
-    # for r in range(len(pixels_regions)):
-    #     for c in range(len(pixels_regions[0])):
-    #         pixel = pixels_regions[r][c]
-    #
-    #         for G1 in regions:
-    #             if pixel in G1.subregions:
-    #                 G1.T[len(pixels_regions[0])*r+c] = 1
-    #             else:
-    #                 for subregion in G1.subregions:
-    #                     if subregion.isNeighbor(pixel):
-    #                         G1.T[len(pixels_regions[0]) * r + c] = pixel.coarseNeighborhood(subregion)
-    #
-    #
     for i,pixel in enumerate(pixels_regions):
         for G1 in regions:
             if pixel in G1.subregions:
@@ -151,8 +113,48 @@ def coarse_0(pixels_regions):
                         G1.T[i] = pixel.coarseNeighborhood(subregion)
 
 
+    for G1 in regions:
+        G1.value = calcQ0I(G1.T,pixels_regions)
+        G1.edges_res = calcQ0E(G1.T,pixels_regions)
     #assign nighbors to new regions
     process_neighbors(regions)
-    # calc_weights(regions)
+    calc_weights(regions)
+
+    return regions
+
+def coarse(downregions):
+    regions = []
+
+    id = 0
+    for dr in downregions:
+        if dr.parent is None:
+            Gs = Region(id=id)
+            id+=1
+            Gs.addSubregion(dr)
+            T = np.zeros((len(downregions), 1))
+            for sr in Gs.subregions:
+                for nb in sr.neighbors:
+                    if nb.parent is None:
+                        res = nb.computeProbabilityofC(Gs)
+                        if res > PSI_MERGE:
+                            Gs.addSubregion(nb)
+            Gs.T = T
+            regions.append(Gs)
+
+    for i, pixel in enumerate(downregions):
+        for Gs in regions:
+            if pixel in Gs.subregions:
+                Gs.T[i] = 1
+            else:
+                for subregion in Gs.subregions:
+                    if subregion.isNeighbor(pixel):
+                        Gs.T[i] = pixel.coarseNeighborhood(subregion)
+
+    for Gs in regions:
+        Gs.value = calcQsI(Gs.T, downregions)
+        Gs.edges_res = calcQsE(Gs.T, downregions)
+    # assign nighbors to new regions
+    process_neighbors(regions)
+    calc_weights(regions)
 
     return regions

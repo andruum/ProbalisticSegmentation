@@ -12,6 +12,7 @@ def get_sparseness(R):
    if n == 1:
        return 2
    S = (1/(math.sqrt(n)-1))*(math.sqrt(n)-n1/n2)
+
    return S
 
 def prob_cue_R(R):
@@ -20,8 +21,11 @@ def prob_cue_R(R):
     a = 41.9162
     b = -37.1885
 
+    if -(a*sparseness+b) < 0:
+        pass
     res = 1/(1-math.exp(-(a*sparseness+b)))
-
+    if res < 0:
+        res = 0
     return res
 
 def prob_cue_1(Ri,Rj):
@@ -57,7 +61,7 @@ def likehood_intensity_p(Ri,Rj):
 
     omega_min = min(omega_i,omega_j)
 
-    sigma_noise = 1
+    sigma_noise = 0.5
     simga_scale = sigma_noise/math.sqrt(omega_min)
 
     sigma_p_ij = sigma_p_local+simga_scale
@@ -78,7 +82,7 @@ def likehood_intensity_m(Ri,Rj):
     omega_i = Ri.getTotalPixels()
     omega_j = Rj.getTotalPixels()
     omega_min = min(omega_i,omega_j)
-    sigma_noise = 1
+    sigma_noise = 0.5
     simga_scale = sigma_noise/math.sqrt(omega_min)
     sigma_m_ij = sigma_m_local+simga_scale
 
@@ -99,10 +103,22 @@ def likehood_texture_p(Ri,Rj):
     Dip = Ri.getTextureDifferenceP()
     Djp = Rj.getTextureDifferenceP()
 
-    alpha_p = (k-2)/(min(Dip,Djp))
+    minD = min(Dip,Djp)
 
-    res = chi_square(Dij*alpha_p,k)
+    alpha_p = 0
+    res = 0
+    if minD == 0 and Dij == 0:
+        alpha_p = k - 2
+        res = chi_square(alpha_p, k)
+    else:
+        if minD == 0:
+            minD = 0.1
+        alpha_p = (k-2)/(minD)
+        res = chi_square(Dij / alpha_p, k)
 
+
+    # if res ==0:
+    #     print("Error?")
     return res
 
 def likehood_texture_m(Ri,Rj):
@@ -113,9 +129,16 @@ def likehood_texture_m(Ri,Rj):
     Dim = Ri.getTextureDifferenceM()
     Djm = Rj.getTextureDifferenceM()
 
-    alpha_m = (k-2)/((Dim+Djm)/2)
+    mean = (Dim+Djm)/2
+    if mean == 0:
+        mean = 0.1
 
-    res = chi_square(Dij*alpha_m,k)
+    alpha_m = (k-2)/(mean)
+
+    res = chi_square(Dij/alpha_m,k)
+
+    # if res ==0:
+    #     print("Error?")
 
     return res
 
@@ -132,6 +155,9 @@ def prob_sp_cue(Ri, Rj, cue):
     p_sp = prior(Ri,Rj)
     p_sm = 1 - p_sp
 
+    # if (lp*p_sp+lm*p_sm) == 0:
+    #     print("Error")
+
     res = lp*p_sp/(lp*p_sp+lm*p_sm)
 
     return res
@@ -140,10 +166,13 @@ def prob_sp_cue(Ri, Rj, cue):
 def prob_sp(Ri, Rj):
     res = 0
     cues = ["intensity","texture"]
-    #cues = ["texture"]
+    # cues = ["texture"]
+    # cues = ["intensity"]
     for cue in cues:
         p_cue = prob_cue_1(Ri,Rj)
         if cue == "texture":
             p_cue = 1 - p_cue
+            if p_cue != 0:
+                pass
         res += prob_sp_cue(Ri,Rj,cue)*p_cue
     return res
