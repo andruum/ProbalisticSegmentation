@@ -7,13 +7,13 @@ import utils
 
 if __name__ == '__main__':
 
-    image = utils.getImage('rsz_1test2.jpg')
+    image = utils.getImage('datasets/rsz_test_keyboard.jpg')
 
     G0 = GraphCoarse.image_to_graph(image)
     Gs = GraphCoarse.coarse_0(G0)
 
-    while len(Gs)>10:
+    while len(Gs)>=5:
         Gs = GraphCoarse.coarse(Gs)
         print("Current:",len(Gs))
 
-    utils.debugImage(Gs,image)
+    utils.debugImagePixels(Gs,image)

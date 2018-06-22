@@ -32,7 +32,7 @@ def getTestArray(rows,cols):
     return image
 
 
-def debugImage(Gs,image):
+def debugImageBoundary(Gs,image):
     image_debug = np.zeros(image.shape)
 
     for g in Gs:
@@ -43,6 +43,17 @@ def debugImage(Gs,image):
             image_debug[r,c] = 255
     showImage(image_debug)
 
-def showImage(img):
+def debugImagePixels(Gs,image):
+    for g in Gs:
+        image_debug = np.zeros(image.shape)
+        bp = g.getPixelsRegions()
+        for p in bp:
+            r = int(p.id / image.shape[1])
+            c = p.id - r * image.shape[1]
+            image_debug[r,c] = 255
+        showImage(image_debug,0)
+
+
+def showImage(img,time=0):
     cv2.imshow("debug:", img)
-    cv2.waitKey(0)
+    cv2.waitKey(time)

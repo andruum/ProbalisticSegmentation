@@ -1,11 +1,7 @@
 import numpy as np
 import math
-
 import Region
 import configs
-
-
-
 
 #texture probability utils
 def getHist(pixels):

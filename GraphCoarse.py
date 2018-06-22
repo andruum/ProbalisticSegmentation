@@ -69,8 +69,6 @@ def coarse_0(pixels_regions):
                             G1.addSubregion(nb)
             regions.append(G1)
 
-    print("Calc values")
-
     for G1 in regions:
         tqsum = 0
         tesum = np.zeros((4,1))
@@ -112,8 +110,6 @@ def coarse(downregions):
                         if res > configs.PSI_MERGE:
                             G1.addSubregion(nb)
             regions.append(G1)
-
-    print("Calc values")
 
     for G1 in regions:
         tqsum = 0

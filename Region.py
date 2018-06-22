@@ -120,6 +120,15 @@ class Region:
                     self.pixels.extend(sr.getPixelsValues())
         return self.pixels
 
+    def getPixelsRegions(self):
+        pixels = []
+        if self.pixel:
+            pixels.append(self)
+        else:
+            for sr in self.subregions:
+                pixels.extend(sr.getPixelsRegions())
+        return pixels
+
     def getBoundaryPixels(self):
         if self.boundary_pixels is None:
             self.boundary_pixels = []
