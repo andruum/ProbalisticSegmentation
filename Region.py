@@ -225,7 +225,7 @@ class Region:
             len_d = 0
             for nb in self.neighbors:
                 len_d += getCommonLen(self,nb)*abs(self.getIntensity() - nb.getIntensity())
-            self.externalMDifference_ = len_d/(self.getTotalBoundary()-getFreeLen(self))
+            self.externalMDifference_ = len_d/(self.getTotalBoundary())
 
         return self.externalMDifference_
 
