@@ -15,19 +15,40 @@ def getTextureDifference(Ri, Rj):
             Dij += 0
     return Dij
 
+def getCommonLenPixels(psi,psj):
+    res = 0
+    for pi in psi:
+        for pj in psj:
+            if pi.isNeighbor(pj):
+                res += 1
+    return res
+
+
 def getCommonLen(Ri,Rj):
     res = 0
-
     if Ri.pixel == False:
-        for sri in Ri.subregions:
-            for srj in Rj.subregions:
-                if sri.pixel == False:
-                    res += getCommonLen(sri,srj)
-
+        psi = Ri.getBoundaryPixels()
+        psj = Rj.getBoundaryPixels()
+        res = getCommonLenPixels(psi,psj)
     else:
-        for pj in Rj.neighbors:
-            res += 1 if (Ri == pj) else 0
+        res = 1
     return res
+
+
+
+# def getCommonLen(Ri,Rj):
+#     res = 0
+#
+#     if Ri.pixel == False:
+#         for sri in Ri.subregions:
+#             for srj in Rj.subregions:
+#                 if sri.pixel == False:
+#                     res += getCommonLen(sri,srj)
+#
+#     else:
+#         for pj in Rj.neighbors:
+#             res += 1 if (Ri == pj) else 0
+#     return res
 
 def getFreeLen(R):
     res = 0
@@ -38,6 +59,25 @@ def getFreeLen(R):
         res += 4 - len(R.neighbors)
     return res
 
+def getSuperParent(reg):
+    if reg.parent != None:
+        return getSuperParent(reg.parent)
+    else:
+        return reg
+
+def mergeBoundaries(bp1,bp2):
+    res = []
+    for p1 in bp1:
+        for p1n in p1.neighbors:
+            if p1n.parent != p1.parent:
+                res.append(p1)
+                break
+    for p2 in bp2:
+        for p2n in p2.neighbors:
+            if p2n.parent != p2.parent:
+                res.append(p2)
+                break
+    return res
 
 class Region:
     def __init__(self,pixel=False,value = -1, id = -1):
@@ -63,6 +103,8 @@ class Region:
         self.texture_diff_p = None
         self.texture_diff_m = None
 
+        self.boundary_pixels = None
+
 
     def addSubregion(self, subregion):
         self.subregions.append(subregion)
@@ -81,8 +123,16 @@ class Region:
 
     def getBoundaryPixels(self):
         if self.boundary_pixels is None:
-            for p in self.pixels:
-                if
+            self.boundary_pixels = []
+            for p in self.subregions:
+                if p.pixel:
+                    for nb in p.neighbors:
+                        if nb.parent != p.parent:
+                            self.boundary_pixels.append(p)
+                            break
+                else:
+                    bp = p.getBoundaryPixels()
+                    self.boundary_pixels = mergeBoundaries(self.boundary_pixels,bp)
 
         return self.boundary_pixels
 

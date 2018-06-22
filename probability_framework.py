@@ -71,7 +71,7 @@ def prior(Ri,Rj):
 
 
 def normpdf(x, mean, sd):
-    var = float(sd)**2
+    var = float(sd)
     pi = 3.1415926
     denom = (2*pi*var)**.5
     num = math.exp(-(float(x)-float(mean))**2/(2*var))
@@ -97,6 +97,10 @@ def likehood_intensity_p(Ri,Rj):
     sigma_p_ij = sigma_p_local+simga_scale
 
     res = normpdf(delta_ij,0,sigma_p_ij)
+
+    # if res == 0:
+    #     print("1")
+    #     pass
 
     return res
 
@@ -192,7 +196,10 @@ def prob_sp_cue_i(Ri, Rj):
     p_sp = prior(Ri,Rj)
     p_sm = 1 - p_sp
 
-    res = lp*p_sp/(lp*p_sp+lm*p_sm)
+    if (lp*p_sp+lm*p_sm) == 0:
+        res = 0
+    else:
+        res = lp*p_sp/(lp*p_sp+lm*p_sm)
 
     return res
 
