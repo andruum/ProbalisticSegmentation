@@ -3,12 +3,8 @@ from Region import Region
 import numpy as np
 import GraphCoarse
 
-import random
-import sys
 
 SHAPE = (10,10)
-
-import pickle
 
 def debug_region(reg,image,Gid):
     if reg.pixel:
@@ -37,36 +33,35 @@ def getTestArray():
             image[r,c] = 100 if c < SHAPE[0]/2 else 0
     return image
 
-def dumpGraph(Gs):
-    sys.setrecursionlimit(1000)
-    pickle.dump(Gs, open("save.p", "wb"))
-def loadGraph():
-    return pickle.load(open("save.p", "rb"))
+def debugImage(Gs,image):
+    image_debug = np.zeros(image.shape)
+
+    image_debug[100:120,100:120] = 255
+
+    for g in Gs:
+        bp = g.getBoundaryPixels()
+        for p in bp:
+            r = int(p.id / image.shape[1])
+            c = p.id - r * image.shape[1]
+            image_debug[r,c] = 255
+    showImage(image_debug)
+
+def showImage(img):
+    cv2.imshow("debug:", img)
+    cv2.waitKey(0)
 
 if __name__ == '__main__':
 
     image = getImage()
+
     G0 = GraphCoarse.image_to_graph(image)
     Gs = GraphCoarse.coarse_0(G0)
-    #dumpGraph(Gs)
+
+    debugImage(Gs, image)
 
 
-
-    #Gs = loadGraph()
-
-    while len(Gs)>100:
+    while len(Gs)>400:
         Gs = GraphCoarse.coarse(Gs)
         print("Current:",len(Gs))
 
-    #print(len(Gs))
-    #debug(Gs)
-    #
-    # if len(Gs) != 2:
-    #     complete = False
-    #     while complete == False:
-    #         Gs = GraphCoarse.coarse(Gs)
-    #         if len(Gs) <= 2:
-    #             complete = True
-    #
-    #
-    # print(len(Gs))
+    debugImage(Gs,image)

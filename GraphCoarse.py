@@ -2,7 +2,7 @@ import numpy as np
 from Region import Region
 
 
-PSI_MERGE = 0.3
+PSI_MERGE = 0.2
 
 
 
