@@ -2,11 +2,9 @@ import numpy as np
 import math
 
 import Region
+import configs
 
-SIGMA_NOISE = 7
-CUES = ["intensity","texture"]
-# CUES = ["texture"]
-#CUES = ["intensity"]
+
 
 
 #texture probability utils
@@ -16,7 +14,7 @@ def getHist(pixels):
 
 
 def get_sparseness(R):
-   pixels = R.getPixels()
+   pixels = R.getPixelsValues()
 
    G = getHist(pixels)
 
@@ -91,7 +89,7 @@ def likehood_intensity_p(Ri,Rj):
 
     omega_min = min(omega_i,omega_j)
 
-    sigma_noise = SIGMA_NOISE
+    sigma_noise = configs.SIGMA_NOISE
     simga_scale = sigma_noise/math.sqrt(omega_min)
 
     sigma_p_ij = sigma_p_local+simga_scale
@@ -116,7 +114,7 @@ def likehood_intensity_m(Ri,Rj):
     omega_i = Ri.getTotalPixels()
     omega_j = Rj.getTotalPixels()
     omega_min = min(omega_i,omega_j)
-    sigma_noise = SIGMA_NOISE
+    sigma_noise = configs.SIGMA_NOISE
     simga_scale = sigma_noise/math.sqrt(omega_min)
     sigma_m_ij = sigma_m_local+simga_scale
 
@@ -207,7 +205,7 @@ def prob_sp_cue_i(Ri, Rj):
 def prob_sp(Ri, Rj):
     res = 0
 
-    if not Ri.pixel:
+    if not Ri.pixel or "texture" in configs.CUES:
         p_cue_i = prob_cue_1(Ri, Rj)
         p_cue_t = 1 - p_cue_i
         res = p_cue_i*prob_sp_cue_i(Ri, Rj)+prob_sp_cue_t(Ri, Rj)*p_cue_t

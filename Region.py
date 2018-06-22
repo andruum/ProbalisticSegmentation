@@ -2,6 +2,10 @@ import numpy as np
 import math
 import probability_framework
 
+import time
+
+
+
 
 
 def getTextureDifference(Ri, Rj):
@@ -24,7 +28,9 @@ def getCommonLenPixels(psi,psj):
     return res
 
 
+
 def getCommonLen(Ri,Rj):
+
     res = 0
     if Ri.pixel == False:
         psi = Ri.getBoundaryPixels()
@@ -32,23 +38,9 @@ def getCommonLen(Ri,Rj):
         res = getCommonLenPixels(psi,psj)
     else:
         res = 1
+
     return res
 
-
-
-# def getCommonLen(Ri,Rj):
-#     res = 0
-#
-#     if Ri.pixel == False:
-#         for sri in Ri.subregions:
-#             for srj in Rj.subregions:
-#                 if sri.pixel == False:
-#                     res += getCommonLen(sri,srj)
-#
-#     else:
-#         for pj in Rj.neighbors:
-#             res += 1 if (Ri == pj) else 0
-#     return res
 
 def getFreeLen(R):
     res = 0
@@ -65,19 +57,26 @@ def getSuperParent(reg):
     else:
         return reg
 
-def mergeBoundaries(bp1,bp2):
-    res = []
-    for p1 in bp1:
-        for p1n in p1.neighbors:
-            if p1n.parent != p1.parent:
-                res.append(p1)
+def mergeBoundaries(base,bp2):
+    for p1 in base:
+        stay = False
+        for n in p1.neighbors:
+            if n.parent != p1.parent:
+                stay = True
                 break
+        if not stay:
+            base.remove(p1)
+
+    base.extend(bp2)
+
     for p2 in bp2:
-        for p2n in p2.neighbors:
-            if p2n.parent != p2.parent:
-                res.append(p2)
+        stay = False
+        for n in p2.neighbors:
+            if n.parent != p2.parent:
+                stay = True
                 break
-    return res
+        if not stay:
+            base.remove(p2)
 
 class Region:
     def __init__(self,pixel=False,value = -1, id = -1):
@@ -111,14 +110,14 @@ class Region:
         subregion.parent = self
 
 
-    def getPixels(self):
+    def getPixelsValues(self):
         if self.pixels is None:
             self.pixels = []
             if self.pixel:
                 self.pixels.append(self.value)
             else:
                 for sr in self.subregions:
-                    self.pixels.extend(sr.getPixels())
+                    self.pixels.extend(sr.getPixelsValues())
         return self.pixels
 
     def getBoundaryPixels(self):
@@ -132,14 +131,14 @@ class Region:
                             break
                 else:
                     bp = p.getBoundaryPixels()
-                    self.boundary_pixels = mergeBoundaries(self.boundary_pixels,bp)
+                    mergeBoundaries(self.boundary_pixels,bp)
 
         return self.boundary_pixels
 
     def getTotalPixels(self):
         if self.pixel:
             return 1
-        return len(self.getPixels())
+        return len(self.getPixelsValues())
 
     # direction 0 upper ,1 right ,2 down ,3 left. for pixels
     def addNeighbor(self, region, direction=-1):

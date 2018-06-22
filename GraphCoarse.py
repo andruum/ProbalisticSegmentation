@@ -1,8 +1,6 @@
 import numpy as np
 from Region import Region
-
-
-PSI_MERGE = 0.2
+import configs
 
 
 
@@ -10,7 +8,7 @@ def image_to_graph(image):
     pixels = []
     for i in range(image.shape[0]):
         for j in range(image.shape[1]):
-            reg = Region(True, image[i,j],i*(image.shape[0])+j)
+            reg = Region(True, image[i,j],i*(image.shape[1])+j)
             pixels.append(reg)
 
     cols = image.shape[1]
@@ -67,7 +65,7 @@ def coarse_0(pixels_regions):
                 for nb in sr.neighbors:
                     if nb.parent is None:
                         res = nb.computeProbabilityofC(G1)
-                        if res > PSI_MERGE:
+                        if res > configs.PSI_MERGE:
                             G1.addSubregion(nb)
             regions.append(G1)
 
@@ -111,7 +109,7 @@ def coarse(downregions):
                 for nb in sr.neighbors:
                     if nb.parent is None:
                         res = nb.computeProbabilityofC(G1)
-                        if res > PSI_MERGE:
+                        if res > configs.PSI_MERGE:
                             G1.addSubregion(nb)
             regions.append(G1)
 
