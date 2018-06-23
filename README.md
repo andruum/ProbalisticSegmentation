@@ -1,10 +1,9 @@
 # ProbalisticSegmentation
 
 Требования:
-
-cv2
-numpy
 python3
+cv2 (pip3 install opencv-python)
+numpy((pip3 install numpy)
 
 Запуск:
 
