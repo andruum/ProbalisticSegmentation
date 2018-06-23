@@ -27,7 +27,7 @@ if __name__ == '__main__':
     Gs = GraphCoarse.coarse_0(G0)
 
     while len(Gs)>max_regions:
-        Gs = GraphCoarse.coarse(Gs)
+        Gs = GraphCoarse.coarse(Gs,max_regions)
         print("Current:",len(Gs))
 
     utils.debugImagePixels(Gs,image)

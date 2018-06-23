@@ -93,7 +93,7 @@ def coarse_0(pixels_regions):
     return regions
 
 
-def coarse(downregions):
+def coarse(downregions,max_regions):
     regions = []
 
     id = 0
@@ -128,8 +128,9 @@ def coarse(downregions):
         G1.value = tqsum/tsum
         G1.edges_res = tesum/tsum
 
-    #assign nighbors to new regions
-    process_neighbors(regions)
-    calc_weights(regions)
+    if len(regions) > max_regions:
+        #assign nighbors to new regions
+        process_neighbors(regions)
+        calc_weights(regions)
 
     return regions
