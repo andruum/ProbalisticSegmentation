@@ -111,24 +111,25 @@ def coarse(downregions,max_regions):
                             G1.addSubregion(nb)
             regions.append(G1)
 
-    for G1 in regions:
-        tqsum = 0
-        tesum = np.zeros((4,1))
-        tsum = 0
-        for sr in G1.subregions:
-            tsum += 1*len(sr.subregions)
-            tqsum += sr.value*len(sr.subregions)
-            tesum += sr.getEdgeResponse()*len(sr.subregions)
-            for nb in sr.neighbors:
-                if nb.parent != G1:
-                    tsum += nb.coarseNeighborhood(sr)*len(sr.subregions)
-                    tqsum += nb.coarseNeighborhood(sr)*nb.value*len(sr.subregions)
-                    tesum += nb.coarseNeighborhood(sr)*nb.getEdgeResponse()*len(sr.subregions)
-
-        G1.value = tqsum/tsum
-        G1.edges_res = tesum/tsum
-
     if len(regions) > max_regions:
+        for G1 in regions:
+            tqsum = 0
+            tesum = np.zeros((4,1))
+            tsum = 0
+            for sr in G1.subregions:
+                tsum += 1*len(sr.subregions)
+                tqsum += sr.value*len(sr.subregions)
+                tesum += sr.getEdgeResponse()*len(sr.subregions)
+                for nb in sr.neighbors:
+                    if nb.parent != G1:
+                        tsum += nb.coarseNeighborhood(sr)*len(sr.subregions)
+                        tqsum += nb.coarseNeighborhood(sr)*nb.value*len(sr.subregions)
+                        tesum += nb.coarseNeighborhood(sr)*nb.getEdgeResponse()*len(sr.subregions)
+
+            G1.value = tqsum/tsum
+            G1.edges_res = tesum/tsum
+
+
         #assign nighbors to new regions
         process_neighbors(regions)
         calc_weights(regions)

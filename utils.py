@@ -7,7 +7,7 @@ import time
 # SHAPEIMG = (100,200)
 # SHAPEIMG_SHOW = (SHAPEIMG[0]*4,SHAPEIMG[1]*4)
 
-PIXELS = 40000
+PIXELS = 20000
 
 def getShapeForCalc(image_shape):
     img_pixels = image_shape[0]*image_shape[1]
