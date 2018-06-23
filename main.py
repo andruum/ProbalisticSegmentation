@@ -1,11 +1,17 @@
 import GraphCoarse
 import utils
 import sys
-
+import os
 
 if __name__ == '__main__':
 
+    if len(sys.argv) == 1:
+        raise Exception('Specify path to image!')
+
     img_path = sys.argv[1]
+
+    if not os.path.exists(img_path):
+        raise Exception('Image not exists!')
 
     if len(sys.argv) == 3:
         max_regions = int(sys.argv[2])

@@ -1,11 +1,13 @@
 import cv2
 import numpy as np
 import math
+import os
+import time
 
 # SHAPEIMG = (100,200)
 # SHAPEIMG_SHOW = (SHAPEIMG[0]*4,SHAPEIMG[1]*4)
 
-PIXELS = 20000
+PIXELS = 30000
 
 def getShapeForCalc(image_shape):
     img_pixels = image_shape[0]*image_shape[1]
@@ -67,6 +69,14 @@ def resizeImg(image):
 def debugImagePixels(Gs,image):
     print("Found regions:",len(Gs))
     shape = getShapeForCalc(image.shape)
+
+    timev = time.time()
+    timev = int(timev)
+    path = './results/' + str(timev)
+    print('Save to :', path)
+    if not os.path.exists(path):
+        os.makedirs(path)
+
     for g in Gs:
         image_debug = np.zeros(shape)
         bp = g.getPixelsRegions()
@@ -75,7 +85,7 @@ def debugImagePixels(Gs,image):
             c = p.id - r * shape[1]
             image_debug[r,c] = 255
         # showImage(image_debug,0)
-        saveImage(image_debug,g.id)
+        saveImage(image_debug,path,g.id)
 
 
 def showImage(img,time=0, name = 'debug'):
@@ -83,5 +93,7 @@ def showImage(img,time=0, name = 'debug'):
     cv2.imshow(name, img_res)
     cv2.waitKey(time)
 
-def saveImage(image,name):
-    cv2.imwrite('./results/'+str(name)+'.png', image)
+
+
+def saveImage(image,folder,name):
+    cv2.imwrite(folder+'/'+str(name)+'.png', image)
