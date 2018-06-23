@@ -1,11 +1,19 @@
 # ProbalisticSegmentation
 
-Requirements:
+Требования:
+
 cv2
 numpy
-python3 
+python3
 
-Results:
-![alt text](https://raw.githubusercontent.com/andruum/ProbalisticSegmentation/master/datasets/rsz_test_keyboard.jpg)
-.
-![alt text](https://raw.githubusercontent.com/andruum/ProbalisticSegmentation/master/results/debug%3A_screenshot_22.06.2018.png)
+Запуск:
+
+python3 main.py path-to-image max-num-regions
+
+где:
+
+path-to-image - путь к изображению
+
+max-num-regions - максимальное количество регионов, на которые нужно разделить картинку. 
+
+Результаты появятся в ./results
